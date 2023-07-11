@@ -27,18 +27,9 @@ export default function ChatPage() {
       return newChatMessages;
     });
     setMessageText("");
-    const response = await fetch(`/api/chat/createNewChat`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        message: messageText,
-      }),
-    });
-    const json = await response.json();
-    console.log("NEW CHAT: ", json);
-    /*const response = await fetch(`/api/chat/sendMessage`, {
+
+    //console.log("NEW CHAT: ", json);
+    const response = await fetch(`/api/chat/sendMessage`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -55,7 +46,7 @@ export default function ChatPage() {
       console.log("MESSAGE: ", message);
       setIncomingMessage((s) => `${s}${message.content}`);
     });
-    */
+
     method: setGeneratingResponse(false);
   };
 
