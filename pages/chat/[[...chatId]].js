@@ -67,7 +67,7 @@ export default function ChatPage() {
       <div className="grid h-screen grid-cols-[260px_1fr]">
         <ChatSideBar />
         <div className="flex flex-col overflow-hidden bg-gray-700 ">
-          <div className="flex-1 overflow-scroll text-white">
+          <div className="flex-1 overflow-auto text-white">
             {newChatMessages.map((message) => (
               <Message
                 key={message._id}
