@@ -8,6 +8,8 @@ import { useRouter } from "next/router";
 import { getSession } from "@auth0/nextjs-auth0";
 import clientPromise from "lib/mongodb";
 import { ObjectId } from "mongodb";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRobot } from "@fortawesome/free-solid-svg-icons";
 
 export default function ChatPage({ chatId, title, messages = [] }) {
   console.log("props: ", title, messages);
@@ -109,18 +111,33 @@ export default function ChatPage({ chatId, title, messages = [] }) {
         <ChatSideBar chatId={chatId} />
         <div className="flex flex-col overflow-hidden bg-gray-700 ">
           <div className="flex flex-1 flex-col-reverse overflow-auto text-white">
-            <div className="mb-auto">
-              {allMessages.map((message) => (
-                <Message
-                  key={message._id}
-                  role={message.role}
-                  content={message.content}
-                />
-              ))}
-              {!!incomingMessage && !routeHasChanged && (
-                <Message role="assistant" content={incomingMessage} />
-              )}
-            </div>
+            {!allMessages.length && !incomingMessage && (
+              <div className="m-auto flex items-center justify-center text-center">
+                <div>
+                  <FontAwesomeIcon
+                    icon={faRobot}
+                    className="text-6xl text-emerald-200"
+                  />
+                  <h1 className="mt-2 text-4xl font-bold text-white/50">
+                    Ask me a question!
+                  </h1>
+                </div>
+              </div>
+            )}
+            {!!allMessages.length && (
+              <div className="mb-auto">
+                {allMessages.map((message) => (
+                  <Message
+                    key={message._id}
+                    role={message.role}
+                    content={message.content}
+                  />
+                ))}
+                {!!incomingMessage && !routeHasChanged && (
+                  <Message role="assistant" content={incomingMessage} />
+                )}
+              </div>
+            )}
             {!!incomingMessage && !!routeHasChanged && (
               <Message
                 role="notice"
