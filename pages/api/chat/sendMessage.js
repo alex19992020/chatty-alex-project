@@ -7,7 +7,8 @@ export const config = {
 export default async function handler(req) {
   console.log("IN HERE!");
   try {
-    const { message } = await req.json();
+    const { chatId: chatIdFromParam, message } = await req.json();
+    let chatId = chatIdFromParam;
     console.log("MESSAGE: ", message);
     const initialChatMessage = {
       role: "system",
@@ -15,21 +16,43 @@ export default async function handler(req) {
         "Your name is Chatty Alex. A quick-thinking AI that always replies with an enthusiastic and positive energy. Your response must be formatted as markdown.",
     };
 
-    const response = await fetch(
-      `${req.headers.get("origin")}/api/chat/createNewChat`,
-      {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          cookie: req.headers.get("cookie"),
-        },
-        body: JSON.stringify({
-          message,
-        }),
-      }
-    );
-    const json = await response.json();
-    const chatId = json._id;
+    let newChatId;
+
+    if (chatId) {
+      //add message to chat
+      const response = await fetch(
+        `${req.headers.get("origin")}/api/chat/addMessageToChat`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            cookie: req.headers.get("cookie"),
+          },
+          body: JSON.stringify({
+            chatId,
+            role: "user",
+            content: message,
+          }),
+        }
+      );
+    } else {
+      const response = await fetch(
+        `${req.headers.get("origin")}/api/chat/createNewChat`,
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            cookie: req.headers.get("cookie"),
+          },
+          body: JSON.stringify({
+            message,
+          }),
+        }
+      );
+      const json = await response.json();
+      chatId = json._id;
+      newChatId = json._id;
+    }
 
     const stream = await OpenAIEdgeStream(
       "https://api.openai.com/v1/chat/completions",
@@ -47,7 +70,9 @@ export default async function handler(req) {
       },
       {
         onBeforeStream: ({ emit }) => {
-          emit(chatId, "newChatId");
+          if (newChatId) {
+            emit(chatId, "newChatId");
+          }
         },
         onAfterStream: async ({ fullContent }) => {
           await fetch(
